@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChargeSmart Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+  <h3>Nearby EV Chargers</h3>
+  <div id="map" style="height: 90vh;"></div>
+  <script>
+    const userLat = 13.05, userLon = 80.25, battery = 60;
+    const map = L.map('map').setView([userLat, userLon], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.marker([userLat, userLon]).addTo(map).bindPopup("You are here").openPopup();
+
+    fetch(`http://localhost:5000/recommend?lat=${userLat}&lon=${userLon}&battery=${battery}`)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(station => {
+          L.marker([station.lat, station.lon])
+            .addTo(map)
+            .bindPopup(`
+              <b>${station.name}</b><br>
+              Status: ${station.status}<br>
+              Slots: ${station.available_slots}<br>
+              Score: ${station.score}
+            `);
+        });
+      });
+  </script>
+</body>
+</html>
